@@ -1,0 +1,17 @@
+POST http://localhost:8080/todos
+Content-Type: application/json
+
+{
+    "text" : "Harry"
+}
+
+GET http://localhost:8080/todos
+Content-Type: application/json
+
+
+GET http://localhost:8080/todos/1
+Content-Type: application/json
+
+
+GET http://localhost:8080/ping
+Content-Type: application/json
