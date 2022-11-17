@@ -5,6 +5,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
+	"github.com/Forceattack012/todoapidemo/auth"
 	"github.com/Forceattack012/todoapidemo/todo"
 )
 
@@ -26,6 +27,8 @@ func main() {
 			"message": "pong",
 		})
 	})
+
+	r.GET("/tokenz", auth.AccessToken)
 
 	r.POST("/todos", handler.NewTask)
 	r.GET("/todos/:id", handler.GetTodo)
