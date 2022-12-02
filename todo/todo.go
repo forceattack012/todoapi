@@ -3,12 +3,9 @@ package todo
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-
-	"github.com/Forceattack012/todoapidemo/auth"
 )
 
 type Todo struct {
@@ -29,15 +26,6 @@ func NewTodoHanlder(db *gorm.DB) *TodoHanlder {
 }
 
 func (h *TodoHanlder) NewTask(c *gin.Context) {
-
-	token := c.Request.Header.Get("Authorization")
-	tokenString := strings.TrimPrefix(token, "Bearer ")
-
-	if err := auth.Protect(tokenString); err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-
 	var todo Todo
 	if err := c.ShouldBindJSON(&todo); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

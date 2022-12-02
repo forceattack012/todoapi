@@ -1,6 +1,6 @@
 POST http://localhost:8080/todos
 Content-Type: application/json
-Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Njg2OTM3NDd9.nxemRJ-p1D9BoNgMCwiV_c5FRAiydXZ93RWNfpxDC-k
+Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NzAwMDI1MTN9.qAq6Dkxc1Xx_6-I0jlWe0Gq8Onn0sR0Yq2iefTojJZQ
 
 {
     "text" : "Harry"

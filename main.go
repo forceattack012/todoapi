@@ -28,9 +28,12 @@ func main() {
 		})
 	})
 
-	r.GET("/tokenz", auth.AccessToken)
+	bytes := []byte("===signed===")
+	r.GET("/tokenz", auth.AccessToken(bytes))
 
-	r.POST("/todos", handler.NewTask)
+	proteced := r.Group("", auth.Protect(bytes))
+
+	proteced.POST("/todos", handler.NewTask)
 	r.GET("/todos/:id", handler.GetTodo)
 	r.GET("/todos", handler.GetTodoList)
 	r.Run()
