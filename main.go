@@ -20,6 +20,11 @@ import (
 	"github.com/Forceattack012/todoapidemo/todo"
 )
 
+var (
+	buildCommit = "dev"
+	buildTime   = time.Now().String()
+)
+
 func main() {
 	err := godotenv.Load("local.env")
 	if err != nil {
@@ -40,6 +45,13 @@ func main() {
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
+		})
+	})
+
+	r.GET("/x", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			buildCommit: buildCommit,
+			buildTime:   buildTime,
 		})
 	})
 
