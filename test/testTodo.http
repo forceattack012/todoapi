@@ -1,18 +1,7 @@
-POST http://localhost:8080/todos
+POST http://localhost:8082/todos
 Content-Type: application/json
-Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NzAwMDI1MTN9.qAq6Dkxc1Xx_6-I0jlWe0Gq8Onn0sR0Yq2iefTojJZQ
+Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NzAwNTUwMTB9.FhEN0BS645VHGHDA7RbGKz7J37G1zQbjzLkbdzR7fog
 
 {
     "text" : "Harry"
 }
-
-GET http://localhost:8080/todos
-Content-Type: application/json
-
-
-GET http://localhost:8080/todos/1
-Content-Type: application/json
-
-
-GET http://localhost:8080/ping
-Content-Type: application/json

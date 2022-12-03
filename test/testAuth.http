@@ -1,2 +1,2 @@
-GET http://localhost:8080/tokenz
+GET http://localhost:8082/tokenz
 Content-Type: application/json

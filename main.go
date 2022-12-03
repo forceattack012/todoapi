@@ -1,6 +1,11 @@
 package main
 
 import (
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -10,8 +15,12 @@ import (
 )
 
 func main() {
-	dsn := "root:123456789@tcp(127.0.0.1:3306)/dogapp?charset=utf8mb4&parseTime=True&loc=Local"
-	var err error
+	err := godotenv.Load("local.env")
+	if err != nil {
+		log.Println("Please consider environment variables %s", err)
+	}
+
+	dsn := os.Getenv("db")
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect to database")
@@ -28,7 +37,7 @@ func main() {
 		})
 	})
 
-	bytes := []byte("===signed===")
+	bytes := []byte(os.Getenv("SIGN"))
 	r.GET("/tokenz", auth.AccessToken(bytes))
 
 	proteced := r.Group("", auth.Protect(bytes))
