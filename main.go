@@ -26,7 +26,13 @@ var (
 )
 
 func main() {
-	err := godotenv.Load("local.env")
+	_, err := os.Create("/live")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove("/live")
+
+	err = godotenv.Load("local.env")
 	if err != nil {
 		log.Println("Please consider environment variables %s", err)
 	}
@@ -46,6 +52,10 @@ func main() {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
+	})
+
+	r.GET("/healthz", func(c *gin.Context) {
+		c.Status(200)
 	})
 
 	r.GET("/x", func(c *gin.Context) {
