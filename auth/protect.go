@@ -14,7 +14,7 @@ func Protect(signature []byte) gin.HandlerFunc {
 		token := c.Request.Header.Get("Authorization")
 		tokenString := strings.TrimPrefix(token, "Bearer ")
 
-		_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		jwtToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
@@ -24,6 +24,11 @@ func Protect(signature []byte) gin.HandlerFunc {
 		if err != nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
+		}
+
+		if claims, ok := jwtToken.Claims.(jwt.MapClaims); ok {
+			aud := claims["aud"]
+			c.Set("aud", aud)
 		}
 
 		c.Next()
