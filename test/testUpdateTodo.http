@@ -1,0 +1,7 @@
+PATCH http://localhost:8082/todos/5
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NzAyNjE3MjN9.Qu8KeVOARzfuFr81kFIInYuzj3f_GjxtEq-AGlIKl8A
+
+{
+    "text" : "John"
+}

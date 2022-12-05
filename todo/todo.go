@@ -83,3 +83,70 @@ func (h *TodoHanlder) GetTodoList(c *gin.Context) {
 
 	c.JSON(http.StatusOK, todo)
 }
+
+func (h *TodoHanlder) RemoveTask(c *gin.Context) {
+	paramId := c.Param("id")
+	id, err := strconv.Atoi(paramId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	result := h.db.Delete(&Todo{}, id)
+	if err := result.Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+	})
+}
+
+func (h *TodoHanlder) UpdateTask(c *gin.Context) {
+	paramId := c.Param("id")
+	id, err := strconv.Atoi(paramId)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	var newTodo Todo
+	if err := c.ShouldBindJSON(&newTodo); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	var oldTodo Todo
+	result := h.db.Find(&oldTodo, id)
+	if err := result.Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	oldTodo.Title = newTodo.Title
+	resultUpdate := h.db.Updates(oldTodo)
+
+	if err := resultUpdate.Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{
+		"message": "sucess",
+	})
+
+}
