@@ -18,12 +18,20 @@ func TableName() string {
 	return "todos"
 }
 
-type TodoHanlder struct {
-	db *gorm.DB
+type Storer interface {
+	New(*Todo) error
+	GetById(*Todo, int) error
+	GetList(*[]Todo) error
+	Remove(*Todo, int) error
+	Update(*Todo) error
 }
 
-func NewTodoHanlder(db *gorm.DB) *TodoHanlder {
-	return &TodoHanlder{db: db}
+type TodoHanlder struct {
+	store Storer
+}
+
+func NewTodoHanlder(store Storer) *TodoHanlder {
+	return &TodoHanlder{store: store}
 }
 
 func (h *TodoHanlder) NewTask(c *gin.Context) {
@@ -45,8 +53,8 @@ func (h *TodoHanlder) NewTask(c *gin.Context) {
 		return
 	}
 
-	r := h.db.Create(&todo)
-	if err := r.Error; err != nil {
+	err := h.store.New(&todo)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -70,10 +78,10 @@ func (h *TodoHanlder) GetTodo(c *gin.Context) {
 	}
 
 	var todo Todo
-	result := h.db.Find(&todo, nId)
-	if err := result.Error; err != nil {
+	errDb := h.store.GetById(&todo, nId)
+	if errDb != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": errDb.Error(),
 		})
 		return
 	}
@@ -83,9 +91,9 @@ func (h *TodoHanlder) GetTodo(c *gin.Context) {
 
 func (h *TodoHanlder) GetTodoList(c *gin.Context) {
 	var todo []Todo
-	result := h.db.Find(&todo)
+	err := h.store.GetList(&todo)
 
-	if err := result.Error; err != nil {
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -105,10 +113,10 @@ func (h *TodoHanlder) RemoveTask(c *gin.Context) {
 		return
 	}
 
-	result := h.db.Delete(&Todo{}, id)
-	if err := result.Error; err != nil {
+	errorRemove := h.store.Remove(&Todo{}, id)
+	if errorRemove != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": errorRemove.Error(),
 		})
 		return
 	}
@@ -138,18 +146,18 @@ func (h *TodoHanlder) UpdateTask(c *gin.Context) {
 	}
 
 	var oldTodo Todo
-	result := h.db.Find(&oldTodo, id)
-	if err := result.Error; err != nil {
+	errorGet := h.store.GetById(&oldTodo, id)
+	if errorGet != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": errorGet.Error(),
 		})
 		return
 	}
 
 	oldTodo.Title = newTodo.Title
-	resultUpdate := h.db.Updates(oldTodo)
+	resultUpdate := h.store.Update(&oldTodo)
 
-	if err := resultUpdate.Error; err != nil {
+	if resultUpdate != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})

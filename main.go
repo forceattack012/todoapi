@@ -47,7 +47,8 @@ func main() {
 
 	db.AutoMigrate(&todo.Todo{})
 
-	handler := todo.NewTodoHanlder(db)
+	gormStore := todo.NewGormStore(db)
+	handler := todo.NewTodoHanlder(gormStore)
 
 	r := gin.Default()
 
