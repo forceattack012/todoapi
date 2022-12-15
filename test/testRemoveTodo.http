@@ -1,3 +1,3 @@
 DELETE http://localhost:8082/todos/7 
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJLaW0iLCJleHAiOjE2NzEwODAwODV9.aDZt83QOABIBAjYkJ5yHrIRy9XjrKSWulYH6thXQI-c
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJLaW0iLCJleHAiOjE2NzEwOTAwMDZ9.W-6wtSMcYbEiGxlEtPEmXcwATDimr06sM-HTGKsPCtA

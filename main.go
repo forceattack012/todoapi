@@ -10,7 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/joho/godotenv"
 	"golang.org/x/time/rate"
 
@@ -19,6 +18,8 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/Forceattack012/todoapidemo/auth"
+	"github.com/Forceattack012/todoapidemo/router"
+	"github.com/Forceattack012/todoapidemo/store"
 	"github.com/Forceattack012/todoapidemo/todo"
 )
 
@@ -36,7 +37,7 @@ func main() {
 
 	err = godotenv.Load("local.env")
 	if err != nil {
-		log.Println("Please consider environment variables %s", err)
+		log.Println("Please consider environment variables %s", err.Error())
 	}
 
 	dsn := os.Getenv("db")
@@ -47,20 +48,9 @@ func main() {
 
 	db.AutoMigrate(&todo.Todo{})
 
-	gormStore := todo.NewGormStore(db)
+	gormStore := store.NewGormStore(db)
 	handler := todo.NewTodoHanlder(gormStore)
-
-	r := gin.Default()
-
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{
-		"http://localhost:8080",
-	}
-	config.AllowHeaders = []string{
-		"Origin",
-		"Authorization",
-		"TransactionID",
-	}
+	r := router.NewMyRouter()
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -86,11 +76,11 @@ func main() {
 
 	proteced := r.Group("", auth.Protect(bytes))
 
-	proteced.GET("/todos/:id", todo.NewGinContext(handler.GetTodo))
-	proteced.GET("/todos", todo.NewGinContext(handler.GetTodoList))
-	proteced.POST("/todos", todo.NewGinContext(handler.NewTask))
-	proteced.PATCH("/todos/:id", todo.NewGinContext(handler.UpdateTask))
-	proteced.DELETE("/todos/:id", todo.NewGinContext(handler.RemoveTask))
+	proteced.GET("/todos/:id", router.NewGinContext(handler.GetTodo))
+	proteced.GET("/todos", router.NewGinContext(handler.GetTodoList))
+	proteced.POST("/todos", router.NewGinContext(handler.NewTask))
+	proteced.PATCH("/todos/:id", router.NewGinContext(handler.UpdateTask))
+	proteced.DELETE("/todos/:id", router.NewGinContext(handler.RemoveTask))
 
 	// create notify context for recived signal SIGINT or SIGTERM
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
