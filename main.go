@@ -86,11 +86,11 @@ func main() {
 
 	proteced := r.Group("", auth.Protect(bytes))
 
-	proteced.GET("/todos/:id", handler.GetTodo)
-	proteced.GET("/todos", handler.GetTodoList)
-	proteced.POST("/todos", handler.NewTask)
-	proteced.PATCH("/todos/:id", handler.UpdateTask)
-	proteced.DELETE("/todos/:id", handler.RemoveTask)
+	proteced.GET("/todos/:id", todo.NewGinContext(handler.GetTodo))
+	proteced.GET("/todos", todo.NewGinContext(handler.GetTodoList))
+	proteced.POST("/todos", todo.NewGinContext(handler.NewTask))
+	proteced.PATCH("/todos/:id", todo.NewGinContext(handler.UpdateTask))
+	proteced.DELETE("/todos/:id", todo.NewGinContext(handler.RemoveTask))
 
 	// create notify context for recived signal SIGINT or SIGTERM
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

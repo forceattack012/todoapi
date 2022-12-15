@@ -26,6 +26,14 @@ type Storer interface {
 	Update(*Todo) error
 }
 
+type Context interface {
+	Bind(interface{}) error
+	JSON(int, interface{})
+	TransactionID() string
+	Audience() string
+	GetParam(interface{}) string
+}
+
 type TodoHanlder struct {
 	store Storer
 }
@@ -34,9 +42,9 @@ func NewTodoHanlder(store Storer) *TodoHanlder {
 	return &TodoHanlder{store: store}
 }
 
-func (h *TodoHanlder) NewTask(c *gin.Context) {
+func (h *TodoHanlder) NewTask(c Context) {
 	var todo Todo
-	if err := c.ShouldBindJSON(&todo); err != nil {
+	if err := c.Bind(&todo); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -44,8 +52,8 @@ func (h *TodoHanlder) NewTask(c *gin.Context) {
 	}
 
 	if todo.Title == "sleep" {
-		transactionId := c.Request.Header.Get("TransactionId")
-		aud, _ := c.Get("aud")
+		transactionId := c.TransactionID()
+		aud := c.Audience()
 		log.Println(aud, transactionId, "not allowed")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "not allowed",
@@ -66,8 +74,8 @@ func (h *TodoHanlder) NewTask(c *gin.Context) {
 	})
 }
 
-func (h *TodoHanlder) GetTodo(c *gin.Context) {
-	id := c.Param("id")
+func (h *TodoHanlder) GetTodo(c Context) {
+	id := c.GetParam("id")
 	nId, err := strconv.Atoi(id)
 
 	if err != nil {
@@ -89,7 +97,7 @@ func (h *TodoHanlder) GetTodo(c *gin.Context) {
 	c.JSON(http.StatusOK, todo)
 }
 
-func (h *TodoHanlder) GetTodoList(c *gin.Context) {
+func (h *TodoHanlder) GetTodoList(c Context) {
 	var todo []Todo
 	err := h.store.GetList(&todo)
 
@@ -103,8 +111,8 @@ func (h *TodoHanlder) GetTodoList(c *gin.Context) {
 	c.JSON(http.StatusOK, todo)
 }
 
-func (h *TodoHanlder) RemoveTask(c *gin.Context) {
-	paramId := c.Param("id")
+func (h *TodoHanlder) RemoveTask(c Context) {
+	paramId := c.GetParam("id")
 	id, err := strconv.Atoi(paramId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -126,8 +134,8 @@ func (h *TodoHanlder) RemoveTask(c *gin.Context) {
 	})
 }
 
-func (h *TodoHanlder) UpdateTask(c *gin.Context) {
-	paramId := c.Param("id")
+func (h *TodoHanlder) UpdateTask(c Context) {
+	paramId := c.GetParam("id")
 	id, err := strconv.Atoi(paramId)
 
 	if err != nil {
@@ -138,7 +146,7 @@ func (h *TodoHanlder) UpdateTask(c *gin.Context) {
 	}
 
 	var newTodo Todo
-	if err := c.ShouldBindJSON(&newTodo); err != nil {
+	if err := c.Bind(&newTodo); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
