@@ -1,6 +1,9 @@
 package todo
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestNewTask(t *testing.T) {
 	handler := NewTodoHanlder(&TestDB{})
@@ -15,7 +18,23 @@ func TestNewTask(t *testing.T) {
 	}
 }
 
-type TestDB struct{}
+func TestGetTodoList(t *testing.T) {
+	handler := NewTodoHanlder(&TestDB{})
+	c := &TestContext{}
+
+	want := &Todo{
+		Title: "test",
+		ID:    0,
+	}
+	handler.GetTodoList(c)
+
+	if c.todos[0].Title != want.Title {
+		t.Errorf("want %s but get %s", want.Title, c.todos[0].Title)
+	}
+}
+
+type TestDB struct {
+}
 
 // GetById implements Storer
 func (*TestDB) GetById(*Todo, int) error {
@@ -23,8 +42,15 @@ func (*TestDB) GetById(*Todo, int) error {
 }
 
 // GetList implements Storer
-func (*TestDB) GetList(*[]Todo) error {
-	panic("unimplemented")
+func (t *TestDB) GetList(todos *[]Todo) error {
+	myTodo := Todo{
+		Title:     "test",
+		ID:        0,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	*todos = append(*todos, myTodo)
+	return nil
 }
 
 // Remove implements Storer
@@ -44,6 +70,7 @@ func (t *TestDB) New(todo *Todo) error {
 type TestContext struct {
 	status int
 	v      map[string]interface{}
+	todos  []Todo
 }
 
 func (c *TestContext) Bind(v interface{}) error {
@@ -54,7 +81,12 @@ func (c *TestContext) Bind(v interface{}) error {
 }
 func (c *TestContext) JSON(statusCode int, v interface{}) {
 	c.status = statusCode
-	c.v = v.(map[string]interface{})
+	if _, ok := v.(map[string]interface{}); ok {
+		c.v = v.(map[string]interface{})
+	} else {
+		todos := v.([]Todo)
+		c.todos = append(todos)
+	}
 }
 func (c *TestContext) TransactionID() string {
 	return ""
