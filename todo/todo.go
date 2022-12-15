@@ -4,14 +4,14 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
+	"time"
 )
 
 type Todo struct {
-	Title string `json:"text" binding:"required"`
-	gorm.Model
+	Title     string `json:"text" binding:"required"`
+	ID        uint   `gorm:"primarykey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func TableName() string {
@@ -45,7 +45,7 @@ func NewTodoHanlder(store Storer) *TodoHanlder {
 func (h *TodoHanlder) NewTask(c Context) {
 	var todo Todo
 	if err := c.Bind(&todo); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": err.Error(),
 		})
 		return
@@ -55,7 +55,7 @@ func (h *TodoHanlder) NewTask(c Context) {
 		transactionId := c.TransactionID()
 		aud := c.Audience()
 		log.Println(aud, transactionId, "not allowed")
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "not allowed",
 		})
 		return
@@ -63,14 +63,14 @@ func (h *TodoHanlder) NewTask(c Context) {
 
 	err := h.store.New(&todo)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"ID": todo.Model.ID,
+	c.JSON(http.StatusCreated, map[string]interface{}{
+		"ID": todo.ID,
 	})
 }
 
@@ -79,7 +79,7 @@ func (h *TodoHanlder) GetTodo(c Context) {
 	nId, err := strconv.Atoi(id)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
 		})
 		return
@@ -88,7 +88,7 @@ func (h *TodoHanlder) GetTodo(c Context) {
 	var todo Todo
 	errDb := h.store.GetById(&todo, nId)
 	if errDb != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": errDb.Error(),
 		})
 		return
@@ -102,7 +102,7 @@ func (h *TodoHanlder) GetTodoList(c Context) {
 	err := h.store.GetList(&todo)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
 		})
 		return
@@ -115,7 +115,7 @@ func (h *TodoHanlder) RemoveTask(c Context) {
 	paramId := c.GetParam("id")
 	id, err := strconv.Atoi(paramId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": err.Error(),
 		})
 		return
@@ -123,13 +123,13 @@ func (h *TodoHanlder) RemoveTask(c Context) {
 
 	errorRemove := h.store.Remove(&Todo{}, id)
 	if errorRemove != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": errorRemove.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "success",
 	})
 }
@@ -139,7 +139,7 @@ func (h *TodoHanlder) UpdateTask(c Context) {
 	id, err := strconv.Atoi(paramId)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": err.Error(),
 		})
 		return
@@ -147,7 +147,7 @@ func (h *TodoHanlder) UpdateTask(c Context) {
 
 	var newTodo Todo
 	if err := c.Bind(&newTodo); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": err.Error(),
 		})
 		return
@@ -156,7 +156,7 @@ func (h *TodoHanlder) UpdateTask(c Context) {
 	var oldTodo Todo
 	errorGet := h.store.GetById(&oldTodo, id)
 	if errorGet != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": errorGet.Error(),
 		})
 		return
@@ -166,13 +166,13 @@ func (h *TodoHanlder) UpdateTask(c Context) {
 	resultUpdate := h.store.Update(&oldTodo)
 
 	if resultUpdate != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusAccepted, gin.H{
+	c.JSON(http.StatusAccepted, map[string]interface{}{
 		"message": "sucess",
 	})
 
